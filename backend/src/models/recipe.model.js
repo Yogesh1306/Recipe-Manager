@@ -8,6 +8,10 @@ const recipeSchema = new Schema(
       trim: true,
       index: true,
     },
+    description: {
+      type: String,
+      required: true,
+    },
     ingredients: {
       type: String,
       required: true,
@@ -23,10 +27,13 @@ const recipeSchema = new Schema(
       type: String,
       required: true,
     },
-    user:{
-        type: Schema.Types.ObjectId,
-        ref: "User"
-    }
+    favoritesCount: {
+      type: Number,
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );
