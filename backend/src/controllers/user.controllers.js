@@ -120,4 +120,48 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 
-export { registerUser, loginUser, logoutUser };
+const googleLogin = asyncHandler(async (req, res) => {
+  const { username, email, avatar } = req.body;
+
+  let existedUser = await User.findOne({ $or: [{ username }, { email }] });
+
+  if (!existedUser) {
+    existedUser = await User.create({
+      username: username.toLowerCase(),
+      email,
+      avatar,
+    });
+  }
+
+  if (existedUser.avatar === "") {
+    existedUser.avatar = avatar;
+    await existedUser.save({ validateBeforeSave: false });
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    existedUser._id
+  );
+
+  const loggedInUser = await User.findById(existedUser._id).select(
+    "-password -refreshToken"
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        { user: loggedInUser, accessToken, refreshToken },
+        "User logged in successfully"
+      )
+    );
+});
+
+export { registerUser, loginUser, logoutUser, googleLogin };
