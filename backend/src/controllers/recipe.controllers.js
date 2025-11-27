@@ -88,7 +88,9 @@ const deleteRecipe = asyncHandler(async (req, res) => {
 const getAllRecipe = asyncHandler(async (req, res) => {
   const recipes = await Recipe.find()
     .populate("user", "username")
-    .sort({ favoritesCount: -1 });
+    .sort({ favoritesCount: -1 })
+    .skip(0)
+    .limit(10);
   return res
     .status(200)
     .json(new ApiResponse(200, recipes, "All recipe retrieved"));
@@ -111,4 +113,10 @@ const addToFavorites = asyncHandler(async (req, res) => {
   );
 });
 
-export { createRecipe, updateRecipeImg, deleteRecipe, getAllRecipe, addToFavorites };
+export {
+  createRecipe,
+  updateRecipeImg,
+  deleteRecipe,
+  getAllRecipe,
+  addToFavorites,
+};
