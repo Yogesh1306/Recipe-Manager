@@ -85,4 +85,9 @@ const deleteRecipe = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, deletedRecipe, "Recipe deleted successfully"));
 });
 
+const getAllRecipe = asyncHandler(async(req,res)=>{
+    const recipes = await Recipe.find().populate("user","username").sort({favoritesCount: -1});
+    return res.status(200).json(new ApiResponse(200, recipes, "All recipe retrieved"))
+})
+
 export { createRecipe, updateRecipeImg, deleteRecipe };
