@@ -71,4 +71,18 @@ const updateRecipeImg = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedImg, "Img updated successfully"));
 });
 
-export { createRecipe, updateRecipeImg };
+const deleteRecipe = asyncHandler(async (req, res) => {
+  const recipeId = req.params.id;
+  const recipe = await Recipe.findById(recipeId);
+  if (!recipe) {
+    throw new ApiError(404, "Recipe not found!!");
+  }
+  const deletedRecipe = await Recipe.findByIdAndDelete(recipe._id, {
+    new: true,
+  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, deletedRecipe, "Recipe deleted successfully"));
+});
+
+export { createRecipe, updateRecipeImg, deleteRecipe };
