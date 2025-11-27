@@ -111,6 +111,26 @@ const addToFavorites = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
+
+  return res.status(200).json(200, {favoritesCount: recipe.favoritesCount}, "successfully added" )
+});
+
+const removeFromFavorites = asyncHandler(async (req, res) => {
+  const recipeId = req.params.id;
+  const recipe = await Recipe.findById(recipeId);
+  if (!recipe) {
+    throw new ApiError(404, "No data available");
+  }
+  recipe.favoritesCount -= 1;
+  await Recipe.save({ validateBeforeSave: false });
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $pull: { favorites: recipe._id },
+    },
+    { new: true }
+  );
+   return res.status(200).json(200, {favoritesCount: recipe.favoritesCount}, "successfully removed" )
 });
 
 export {
@@ -119,4 +139,5 @@ export {
   deleteRecipe,
   getAllRecipe,
   addToFavorites,
+  removeFromFavorites
 };
