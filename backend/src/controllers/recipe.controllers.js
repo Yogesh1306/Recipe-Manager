@@ -44,7 +44,7 @@ const createRecipe = asyncHandler(async (req, res) => {
 const updateRecipeImg = asyncHandler(async (req, res) => {
   const recipeId = req.params.recipeId;
 
-  const recipe = await Recipe.findById({ _id:recipeId, user: req.user._id });
+  const recipe = await Recipe.findById({ _id: recipeId, user: req.user._id });
   if (!recipe) {
     throw new ApiError(404, "No data available");
   }
@@ -85,9 +85,30 @@ const deleteRecipe = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, deletedRecipe, "Recipe deleted successfully"));
 });
 
-const getAllRecipe = asyncHandler(async(req,res)=>{
-    const recipes = await Recipe.find().populate("user","username").sort({favoritesCount: -1});
-    return res.status(200).json(new ApiResponse(200, recipes, "All recipe retrieved"))
-})
+const getAllRecipe = asyncHandler(async (req, res) => {
+  const recipes = await Recipe.find()
+    .populate("user", "username")
+    .sort({ favoritesCount: -1 });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, recipes, "All recipe retrieved"));
+});
 
-export { createRecipe, updateRecipeImg, deleteRecipe };
+const addToFavorites = asyncHandler(async (req, res) => {
+  const recipeId = req.params.id;
+  const recipe = await Recipe.findById(recipeId);
+  if (!recipe) {
+    throw new ApiError(404, "No data available");
+  }
+  recipe.favoritesCount += 1;
+  await Recipe.save({ validateBeforeSave: false });
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $addToSet: { favorites: recipe._id },
+    },
+    { new: true }
+  );
+});
+
+export { createRecipe, updateRecipeImg, deleteRecipe, getAllRecipe, addToFavorites };
