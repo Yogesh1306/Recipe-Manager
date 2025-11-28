@@ -155,6 +155,17 @@ const searchByTitle = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, results, "Retrieved successfully!!"));
 });
 
+const getARecipe = asyncHandler(async (req, res) => {
+  const recipeId = req.params.id;
+  const recipe = await Recipe.findById(recipeId);
+  if (!recipe) {
+    throw new ApiError(404, "No data available");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, recipe, "Recipe retrieved successfully"));
+});
+
 export {
   createRecipe,
   updateRecipeImg,
@@ -162,5 +173,6 @@ export {
   getAllRecipe,
   addToFavorites,
   removeFromFavorites,
-  searchByTitle
+  searchByTitle,
+  getARecipe,
 };
