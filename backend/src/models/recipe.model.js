@@ -38,4 +38,5 @@ const recipeSchema = new Schema(
   { timestamps: true }
 );
 
+recipeSchema.index({ title: "text" });
 export const Recipe = new mongoose.model("Recipe", recipeSchema);
