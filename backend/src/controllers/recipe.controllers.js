@@ -8,6 +8,8 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const createRecipe = asyncHandler(async (req, res) => {
   const { title, description, ingredients, steps, tags } = req.body;
 
+  const tagsArray = tags.toLowerCase().split(",");
+
   const imgLocalPath = req.file?.path;
   if (!imgLocalPath) {
     throw new ApiError(400, "Recipe img is required!!");
@@ -23,7 +25,7 @@ const createRecipe = asyncHandler(async (req, res) => {
     description,
     ingredients,
     steps,
-    tags,
+    tags: tagsArray,
     img: img.url,
     user: req.user,
   });
@@ -161,7 +163,7 @@ const searchByTitle = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Title query parameter is required");
   }
   const skip = (page - 1) * limit;
-  
+
   const results = await Recipe.find({
     title: { $regex: title, $options: "i" },
   })
