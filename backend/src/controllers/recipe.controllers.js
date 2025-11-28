@@ -112,7 +112,9 @@ const addToFavorites = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  return res.status(200).json(200, {favoritesCount: recipe.favoritesCount}, "successfully added" )
+  return res
+    .status(200)
+    .json(200, { favoritesCount: recipe.favoritesCount }, "successfully added");
 });
 
 const removeFromFavorites = asyncHandler(async (req, res) => {
@@ -130,7 +132,27 @@ const removeFromFavorites = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
-   return res.status(200).json(200, {favoritesCount: recipe.favoritesCount}, "successfully removed" )
+  return res
+    .status(200)
+    .json(
+      200,
+      { favoritesCount: recipe.favoritesCount },
+      "successfully removed"
+    );
+});
+
+const searchByTitle = asyncHandler(async (req, res) => {
+  const title = req.query.title;
+  const results = await Recipe.find({
+    title: { $regex: title, $options: "i" },
+  })
+    .sort({ favoritesCount: -1 })
+    .skip(0)
+    .limit(10);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, results, "Retrieved successfully!!"));
 });
 
 export {
@@ -139,5 +161,6 @@ export {
   deleteRecipe,
   getAllRecipe,
   addToFavorites,
-  removeFromFavorites
+  removeFromFavorites,
+  searchByTitle
 };
