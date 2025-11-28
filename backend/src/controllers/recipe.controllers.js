@@ -102,8 +102,14 @@ const addToFavorites = asyncHandler(async (req, res) => {
   if (!recipe) {
     throw new ApiError(404, "No data available");
   }
+
+  const user = await User.findById(req.user._id);
+  if (user.favorites.includes(recipeId)) {
+    throw new ApiError(400, "Recipe already in favorites");
+  }
+
   recipe.favoritesCount += 1;
-  await Recipe.save({ validateBeforeSave: false });
+  await recipe.save({ validateBeforeSave: false });
   await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -114,7 +120,13 @@ const addToFavorites = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(200, { favoritesCount: recipe.favoritesCount }, "successfully added");
+    .json(
+      new ApiResponse(
+        200,
+        { favoritesCount: recipe.favoritesCount },
+        "successfully added"
+      )
+    );
 });
 
 const removeFromFavorites = asyncHandler(async (req, res) => {
@@ -124,7 +136,7 @@ const removeFromFavorites = asyncHandler(async (req, res) => {
     throw new ApiError(404, "No data available");
   }
   recipe.favoritesCount -= 1;
-  await Recipe.save({ validateBeforeSave: false });
+  await recipe.save({ validateBeforeSave: false });
   await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -135,20 +147,27 @@ const removeFromFavorites = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      200,
-      { favoritesCount: recipe.favoritesCount },
-      "successfully removed"
+      new ApiResponse(
+        200,
+        { favoritesCount: recipe.favoritesCount },
+        "successfully removed"
+      )
     );
 });
 
 const searchByTitle = asyncHandler(async (req, res) => {
-  const title = req.query.title;
+  const { title, page = 1, limit = 10 } = req.query.title;
+  if (!title) {
+    throw new ApiError(400, "Title query parameter is required");
+  }
+  const skip = (page - 1) * limit;
+  
   const results = await Recipe.find({
     title: { $regex: title, $options: "i" },
   })
     .sort({ favoritesCount: -1 })
-    .skip(0)
-    .limit(10);
+    .skip(skip)
+    .limit(Number.parseInt(limit));
 
   return res
     .status(200)
