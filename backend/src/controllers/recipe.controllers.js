@@ -79,12 +79,12 @@ const deleteRecipe = asyncHandler(async (req, res) => {
   if (!recipe) {
     throw new ApiError(404, "Recipe not found!!");
   }
-  const deletedRecipe = await Recipe.findByIdAndDelete(recipe._id, {
+  await Recipe.findByIdAndDelete(recipe._id, {
     new: true,
   });
   return res
     .status(200)
-    .json(new ApiResponse(200, deletedRecipe, "Recipe deleted successfully"));
+    .json(new ApiResponse(200, {}, "Recipe deleted successfully"));
 });
 
 const getAllRecipe = asyncHandler(async (req, res) => {
@@ -95,7 +95,13 @@ const getAllRecipe = asyncHandler(async (req, res) => {
     .limit(10);
   return res
     .status(200)
-    .json(new ApiResponse(200, recipes, "All recipe retrieved"));
+    .json(
+      new ApiResponse(
+        200,
+        { recipes, totalRecipes: recipes.length },
+        "All recipe retrieved"
+      )
+    );
 });
 
 const addToFavorites = asyncHandler(async (req, res) => {
@@ -111,7 +117,7 @@ const addToFavorites = asyncHandler(async (req, res) => {
   }
 
   recipe.favoritesCount += 1;
-  await recipe.save({ validateBeforeSave: false });
+  await recipe.save({ validateBeforeSave: true });
   await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -158,7 +164,7 @@ const removeFromFavorites = asyncHandler(async (req, res) => {
 });
 
 const searchByTitle = asyncHandler(async (req, res) => {
-  const { title, page = 1, limit = 10 } = req.query.title;
+  const { title, page = 1, limit = 10 } = req.query;
   if (!title) {
     throw new ApiError(400, "Title query parameter is required");
   }
@@ -168,7 +174,7 @@ const searchByTitle = asyncHandler(async (req, res) => {
     title: { $regex: title, $options: "i" },
   })
     .sort({ favoritesCount: -1 })
-    .skip(skip)
+    .skip(Number(skip))
     .limit(Number.parseInt(limit));
 
   return res

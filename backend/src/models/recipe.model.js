@@ -29,6 +29,7 @@ const recipeSchema = new Schema(
     },
     favoritesCount: {
       type: Number,
+      default:0
     },
     user: {
       type: Schema.Types.ObjectId,
