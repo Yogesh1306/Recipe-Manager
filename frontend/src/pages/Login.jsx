@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visibility, setVisibility] = useState(false);
+  const navigate = useNavigate()
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,6 +18,7 @@ const Login = () => {
     console.log(res.data.data)
     setEmail(" ");
     setPassword(" ");
+    navigate("/")
   };
   return (
     <div className="relative">
