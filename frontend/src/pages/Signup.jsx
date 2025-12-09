@@ -16,7 +16,9 @@ const Signup = () => {
       password,
     });
     console.log(res.data.data);
-    console.log({ email, password });
+    setUsername(" ");
+    setEmail(" ");
+    setPassword(" ");
   };
   return (
     <div className="relative">

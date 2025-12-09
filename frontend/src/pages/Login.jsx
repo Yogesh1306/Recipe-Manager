@@ -14,7 +14,8 @@ const Login = () => {
       password,
     });
     console.log(res.data.data)
-    console.log({ email, password });
+    setEmail(" ");
+    setPassword(" ");
   };
   return (
     <div className="relative">
