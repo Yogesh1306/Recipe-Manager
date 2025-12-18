@@ -8,7 +8,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const createRecipe = asyncHandler(async (req, res) => {
   const { title, description, ingredients, steps, tags } = req.body;
 
-  const tagsArray = tags.toLowerCase().split(",");
+  
 
   const imgLocalPath = req.file?.path;
   if (!imgLocalPath) {
@@ -25,7 +25,7 @@ const createRecipe = asyncHandler(async (req, res) => {
     description,
     ingredients,
     steps,
-    tags: tagsArray,
+    tags: JSON.parse(tags),
     img: img.url,
     user: req.user,
   });
