@@ -1,24 +1,58 @@
 import { useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
-import { useNavigate } from "react-router";
+import { NavLink, useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
+import {
+  loginFailure,
+  loginStart,
+  loginSuccess,
+} from "../redux/user/userSlice";
+import { auth, provider } from "../firebase";
+import { signInWithPopup } from "firebase/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visibility, setVisibility] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res = await axios.post("/api/v1/users/login", {
-      loginInput: email,
-      password,
-    });
-    console.log(res.data.data)
+    dispatch(loginStart());
+    try {
+      const res = await axios.post("/api/v1/users/login", {
+        loginInput: email,
+        password,
+      });
+      dispatch(loginSuccess(res.data.data));
+    } catch (error) {
+      console.log(error);
+      dispatch(loginFailure());
+    }
     setEmail(" ");
     setPassword(" ");
-    navigate("/")
+    navigate("/");
+  };
+
+  const signInWithGoogle = () => {
+    signInWithPopup(auth, provider)
+      .then(async (result) => {
+        const userDetails = {
+          username: result.user.displayName,
+          email: result.user.email,
+          profilePic: result.user.photoURL,
+        };
+        dispatch(loginStart());
+        const res = await axios.post("/api/v1/users/google", userDetails);
+        dispatch(loginSuccess(res.data.data));
+        navigate("/");
+      })
+      .catch((error) => {
+        dispatch(loginFailure());
+        console.log(error);
+      });
   };
   return (
     <div className="relative">
@@ -90,26 +124,27 @@ const Login = () => {
             </button>
           </form>
           <div className="flex flex-col mt-4 items-center justify-center text-sm">
-            <h3 className="dark:text-gray-300">
+            <h3 className="dark:text-gray-300 flex gap-2">
               Don't have an account?
-              <a
-                className="group text-blue-400 transition-all duration-100 ease-in-out"
-                href="#"
-              >
-                <span className="bg-bottom-left bg-linear-to-r from-blue-400 to-blue-400 bg-size-[0%_2px] bg-no-repeat group-hover:bg-size-[100%_2px] transition-all duration-500 ease-out">
-                  Sign Up
-                </span>
-              </a>
+              <NavLink to={"/signup"}>
+                <div className="group text-blue-400 transition-all duration-100 ease-in-out">
+                  <span className="bg-bottom-left bg-linear-to-r from-blue-400 to-blue-400 bg-size-[0%_2px] bg-no-repeat group-hover:bg-size-[100%_2px] transition-all duration-500 ease-out">
+                    Sign Up
+                  </span>
+                </div>
+              </NavLink>
             </h3>
           </div>
           <div
             id="third-party-auth"
             className="flex items-center justify-center mt-5 flex-wrap"
           >
+            {/* Google authentication */}
             <button
               href="#"
               className="hover:scale-105 ease-in-out duration-300 shadow-lg p-2 rounded-lg m-1"
               type="button"
+              onClick={signInWithGoogle}
             >
               <img
                 className="max-w-[25px]"
@@ -117,6 +152,7 @@ const Login = () => {
                 alt="Google"
               />
             </button>
+            {/* LinkedIn Authentication */}
             <button
               href="#"
               className="hover:scale-105 ease-in-out duration-300 shadow-lg p-2 rounded-lg m-1"
@@ -128,6 +164,7 @@ const Login = () => {
                 alt="Linkedin"
               />
             </button>
+            {/* Github Authentication */}
             <button
               href="#"
               className="hover:scale-105 ease-in-out duration-300 shadow-lg p-2 rounded-lg m-1"
@@ -139,6 +176,7 @@ const Login = () => {
                 alt="Github"
               />
             </button>
+            {/* Facebook Authentication */}
             <button
               href="#"
               className="hover:scale-105 ease-in-out duration-300 shadow-lg p-2 rounded-lg m-1"
@@ -150,6 +188,7 @@ const Login = () => {
                 alt="Facebook"
               />
             </button>
+            {/* Twitter Authentication */}
             <button
               href="#"
               className="hover:scale-105 ease-in-out duration-300 shadow-lg p-2 rounded-lg m-1"
@@ -159,18 +198,6 @@ const Login = () => {
                 className="max-w-[25px] dark:gray-100"
                 src="https://ucarecdn.com/82d7ca0a-c380-44c4-ba24-658723e2ab07/"
                 alt="twitter"
-              />
-            </button>
-
-            <button
-              href="#"
-              className="hover:scale-105 ease-in-out duration-300 shadow-lg p-2 rounded-lg m-1"
-              type="button"
-            >
-              <img
-                className="max-w-[25px]"
-                src="https://ucarecdn.com/3277d952-8e21-4aad-a2b7-d484dad531fb/"
-                alt="apple"
               />
             </button>
           </div>
