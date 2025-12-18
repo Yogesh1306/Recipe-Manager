@@ -4,7 +4,8 @@ import axios from "axios";
 
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
-
+  const [page, setPage] = useState(1)
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -16,7 +17,7 @@ const Home = () => {
       }
     };
     fetchData()
-  }, []);
+  }, [page]);
 
   return (
     <div className="mt-50 mx-10 flex flex-col gap-5 flex-wrap ">
@@ -29,8 +30,26 @@ const Home = () => {
           <RecipeCard key={recipe.id} recipe={recipe} />
         ))}
       </div>
+      <div className="flex items-center justify-center gap-4">
+        <button
+          onClick={() => setPage(page - 1)}
+          disabled={page === 1}
+          className="border px-3 py-1 rounded disabled:opacity-50"
+        >
+          Prev
+        </button>
+
+        <span>{page}</span>
+
+        <button
+          onClick={() => setPage(page + 1)}
+          className="border px-3 py-1 rounded"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
-};
+}
 
 export default Home;
