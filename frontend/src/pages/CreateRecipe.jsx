@@ -1,7 +1,6 @@
 import { Add } from "@mui/icons-material";
 import { useState } from "react";
 import axios from "axios";
-import { jsx } from "react/jsx-runtime";
 
 const CreateRecipe = () => {
   const [title, setTitle] = useState("");
