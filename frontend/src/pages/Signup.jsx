@@ -2,6 +2,10 @@ import { useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
+import { loginFailure, loginStart, loginSuccess } from "../redux/user/userSlice";
+import { auth, provider } from "../firebase";
+import { signInWithPopup } from "firebase/auth";
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -9,20 +13,44 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [visibility, setVisibility] = useState(false);
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    const res = await axios.post("/api/v1/users/register", {
-      username,
-      email,
-      password,
-    });
-    console.log(res.data.data);
+    try {
+      await axios.post("/api/v1/users/register", {
+        username,
+        email,
+        password,
+      });
+    } catch (error) {
+      console.log(error)
+    }
     setUsername(" ");
     setEmail(" ");
     setPassword(" ");
     navigate("/")
   };
+
+  const signUpWithGoogle = () => {
+    signInWithPopup(auth, provider)
+      .then(async (result) => {
+        const userDetails = {
+          username: result.user.displayName,
+          email: result.user.email,
+          profilePic: result.user.photoURL,
+        };
+        dispatch(loginStart());
+        const res = await axios.post("/api/v1/users/google", userDetails);
+        dispatch(loginSuccess(res.data.data));
+        navigate("/");
+      })
+      .catch((error) => {
+        dispatch(loginFailure());
+        console.log(error);
+      });
+  };
+
   return (
     <div className="relative">
       <div className="relative z-1">
@@ -46,7 +74,7 @@ const Signup = () => {
             <h1 className="text-2xl xl:text-3xl font-extrabold">Sign up</h1>
             <div className="w-full flex-1 mt-4">
               <div className="flex flex-col items-center">
-                <button className="w-full max-w-xs font-bold shadow-sm rounded-lg py-3 bg-indigo-100 text-gray-800 flex items-center justify-center transition-all duration-300 ease-in-out focus:outline-none hover:shadow focus:shadow-sm focus:shadow-outline">
+                <button className="w-full max-w-xs font-bold shadow-sm rounded-lg py-3 bg-indigo-100 text-gray-800 flex items-center justify-center transition-all duration-300 ease-in-out focus:outline-none hover:shadow focus:shadow-sm focus:shadow-outline bg-linear-to-r dark:text-gray-300 from-blue-500 to-purple-500  mt-6 p-2   hover:scale-105 hover:from-purple-500 hover:to-blue-500 cursor-pointer" onClick={signUpWithGoogle}>
                   <div className="bg-white p-2 rounded-full">
                     <svg className="w-4" viewBox="0 0 533.5 544.3">
                       <path
@@ -70,7 +98,7 @@ const Signup = () => {
                   <span className="ml-4">Sign Up with Google</span>
                 </button>
 
-                <button className="w-full max-w-xs font-bold shadow-sm rounded-lg py-3 bg-indigo-100 text-gray-800 flex items-center justify-center transition-all duration-300 ease-in-out focus:outline-none hover:shadow focus:shadow-sm focus:shadow-outline mt-5">
+                <button className="w-full max-w-xs font-bold shadow-sm rounded-lg py-3 bg-indigo-100 text-gray-800 flex items-center justify-center transition-all duration-300 ease-in-out focus:outline-none hover:shadow focus:shadow-sm focus:shadow-outline mt-5 hover:scale-105 cursor-pointer">
                   <div className="bg-white p-1 rounded-full">
                     <svg className="w-6" viewBox="0 0 32 32">
                       <path
@@ -83,7 +111,7 @@ const Signup = () => {
                 </button>
               </div>
 
-              <div className="my-12 border-b text-center">
+              <div className="mt-7 mb-5 border-b text-center">
                 <div className="leading-none px-2 inline-block text-sm text-gray-100 tracking-wide font-medium  transform translate-y-1/2">
                   Or sign up with e-mail
                 </div>
