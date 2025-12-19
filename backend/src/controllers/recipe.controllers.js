@@ -184,7 +184,7 @@ const searchByTitle = asyncHandler(async (req, res) => {
 
 const getARecipe = asyncHandler(async (req, res) => {
   const recipeId = req.params.id;
-  const recipe = await Recipe.findById(recipeId);
+  const recipe = await Recipe.findById(recipeId).populate("user", "username");
   if (!recipe) {
     throw new ApiError(404, "No data available");
   }
