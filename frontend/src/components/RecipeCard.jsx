@@ -7,9 +7,9 @@ const RecipeCard = ({ recipe }) => {
       className="bg-white w-[25vw] rounded-xl shadow hover:shadow-lg transition overflow-hidden"
     >
       <img
-        src={recipe.image}
+        src={recipe.img}
         alt={recipe.title}
-        className="h-48 w-full object-cover"
+        className="h-58 w-full object-cover"
       />
 
       <div className="p-4">
